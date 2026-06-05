@@ -7,3 +7,11 @@ Look into line priors bc wtf are those
 What is the purpose of the different hdus here?
 
 HDU = Header data unit
+
+Finn Questions
+Which files should we download from the COSMOS catalog?
+
+FITS...help
+
+Is the first portion of the example building a fits file????
+qsopar.fits: is this a file where results or line priors are stored
