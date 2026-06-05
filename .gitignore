@@ -2,3 +2,9 @@
 
 # PYQSO Install
 PyQSOFit/
+data/
+obj_info/
+
+*.ipynb
+*.fits
+*.fit
