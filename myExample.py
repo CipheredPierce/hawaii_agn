@@ -393,7 +393,7 @@ data.info()
 
 
 
-# In[16]:
+# In[50]:
 
 
 path_out = os.path.join(pyqsofit.__path__[0], '../', '~/home/mprdi/Projects/GitHub/hawaii_agn/data/')
@@ -406,11 +406,11 @@ err = 1 / np.sqrt(data[4].data['ivar'])  # 1 sigma error
 z = data[4].data['z'][0]  # Redshift
 
 # Optional
-# ra = data[0].header['plug_ra']  # RA
-# dec = data[0].header['plug_dec']  # DEC
-# plateid = data[0].header['plateid']  # SDSS plate ID
-# mjd = data[0].header['mjd']  # SDSS MJD
-# fiberid = data[0].header['fiberid']  # SDSS fiber ID
+ra = data[0].header['plug_ra']  # RA
+dec = data[0].header['plug_dec']  # DEC
+plateid = data[0].header['plateid']  # SDSS plate ID
+mjd = data[0].header['mjd']  # SDSS MJD
+fiberid = data[0].header['fiberid']  # SDSS fiber ID
 
 
 # __Step 3: Fit the spectrum__<br>
