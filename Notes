@@ -10,12 +10,143 @@ HDU = Header data unit
 
 Finn Questions
 Which files should we download from the COSMOS catalog?
+    30mas (miliarcseconds) pixel scale, science and error in each one
 Which column is the correct redshift?
 Written record of the columns and what they mean
-    ID nonsense
+    ID nonsense: use obcode
+
+Broad vs narrow lines
+FWHM - go up to half the max value of a line, measure the distance and then use the euqation
+1200 km/s 
+find angstrum to km/s - figure out rest/oberserved wave length
 
 FITS...help
 
 Is the first portion of the example building a fits file????
 qsopar.fits: is this a file where results or line priors are stored
 Which 
+
+PYQSOFIT
+Luminosity return: use conti_result (ask Noah where? It's in place of somethingelse_result)
+
+Fitting
+    Find narrow/broad lines to choose a spectograph
+    "Residual": be mostly around 0, is what is left after subtracting the other three things
+        Three things: Ion? Iron? Affects the total luminosity of the spectra so you need to subtract it to get accurate luminosity for the AGN
+    Goal is to get the error to go down
+
+For later
+    Plot the ratio of the black hole masses from different emission lines
+
+6/8
+JWST
+    Using galight
+    Creating 15x15 arcseconds cutouts of all of the subjects
+    100kpc x 100kpc
+
+    Test galight and run through example notebook
+    Use COSMOS cutout server
+
+Overall picture: need the sample size and 
+
+
+Galight Questions
+Dual AGN
+    How does pyfits.getdata() get the psf from a fits file?
+    How is a psf stored in a fits file?
+    WCS - World Coordinate System
+
+    What is the plot of?
+    generate_target_materials is the bit that actually generates the image
+
+    PSO = Physics of stellar objects
+
+    Pls explain if these numbers are good or not
+    Max iteration reached! Stopping.
+    -3.5128751494429835 reduced X^2 of best position
+    -14473.045615705092 log likelihood
+    8240.0 effective number of data points
+
+    Why is it computed twice? Is it computing both point sources?
+    What are the three graphs plotting
+        First one luminosity as you move away from the center of the point source?
+    I don't think the point sources are subtracted here
+    What is a Sersic Model? One instrinsic model intended to accurately represent parts of a galaxy (generalized and cannot account for all morphology components)
+
+
+Paper things    
+    Start with intro and methods
+    Familiarize w/ pyqsofit today and start processing FITS tomorrow
+    Have LOTS of questions for FITS 
+    Figure out how to fit "better"
+
+Pyqsofit
+    When do we bring in black hole sources?
+
+    Bring in 3 preliminary objects in SED classes as the first ones
+    Find class 1, 2, 3
+    Start w/ a class 1?
+
+    Narrow lines are easier?
+    Broad lines 
+
+    Ez software: pyspeckit
+
+    Flux: Measurement of how strong the light is at a certain point
+        Wavelength/Flux graph: at a particular wavelength of light how strong is the light coming through?
+
+    FITTing things
+        Potential: ID 1237247, need to measure FWHM to see broad vs narrow line
+        Potential: ID 317004
+        Potential: ID 690116
+        Potential: 717189
+        Potential: 908478
+        * Potential: 1110861
+        * Potential: 1161061
+        * Potential: 1213741
+
+
+        Interestign to look at later: ID 392319, lots of potential absorbtion lines, absorbtion at Hb and Mg II
+            Also ID 422400
+
+
+** HELP SECTION
+        Need to work on interpreting results
+        Is the results file overwritten every time or is a new HDU appended? How to append data files?
+
+        Fixed set of lines for every source
+        Filter based on redshift if the lines can actually be fit
+            Alter the line priors files?
+        Separate Hb and NII lines
+        Tie the parameters, some are fixed and some are related
+
+        Get broad lines over narrow lines
+        Hb
+        Mg II
+        C IV (May never see it, play with the wavelength)
+        C III (Ask Steph if it can be used)
+
+        Learn about AGN unification paradigm - Meg
+            Polarization in AGN
+
+        Ratio of narrow line methods to correct both
+
+*** TO DO
+        Figure out to tie/limit parameters, try to tie as many as possible
+            Make some dependent of others
+            OIII 3 to 1 ratio
+            Hb_na and Hb_br set width w/ 1200km/s
+        Where is FWHM?
+            kwargs????
+
+        Test with a variety of redshift/SED class
+
+        Limit the range of voffset
+        Add the new csv to the data file
+
+        Core/Wing components
+        OIII max of 1000km/s
+        MgII as broad as it wants, just play with the widths
+
+
+

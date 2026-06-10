@@ -4,6 +4,8 @@
 PyQSOFit/
 data/
 obj_info/
+Galight/
+galight/
 
 *.ipynb
 *.fits
