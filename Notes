@@ -109,6 +109,113 @@ Pyqsofit
         Interestign to look at later: ID 392319, lots of potential absorbtion lines, absorbtion at Hb and Mg II
             Also ID 422400
 
+            From voff
+            v [km/s]  = voff × c
+            Δλ [Å]    = voff × λ_center 
+
+            From v [km/s]
+            voff      = v / c
+            Δλ [Å]    = (v / c) × λ_center
+
+
+            From Δλ [A]
+            voff      = Δλ / λ_center
+            v [km/s]  = (Δλ / λ_center) × c
+
+6/15 Pyqso example file experiments
+Until stated otherwise assume source is spec-0332-52367-0639.fits
+Note: After downloading and running files with no changes, the initial fits were worse than the ones documented in the 
+github example, (ex: not mapping OIII for Hb). This was true for Noah and ID
+
+decompose_host = False
+- Added NL comp for Hb
+- Altered BL comp for Ha, improved chi2
+- Originally continuum (gold line) very poorly modeled data, now is a better fit
+- When True
+    - Host + qso temp is the total? Potentially affected by the PCA model
+    - data - host is just the qso: theoretically what we want
+        - If this interpretation is corrent then contiinuum is still poor but not as severe as orignally thought
+            - Still a constant
+            - FeII is better starting ~4000A
+    - data is original observed
+- When False
+    - Only data, no data - host, no host, no host + qso line
+    - Gold line continuum is no longer constant, could be better fit especially from 4500-5000A
+    - NL and BL appear to follow FeII line very closely
+
+decompose_host = False and poly = True to poly = False
+    - Gold continuum is now a linear function
+    - Broad line component is now veeeryy broad
+    - NL now have smaller peak
+    - Hb no narrow line component
+    - BL now 2 unaligned components
+    - Caused FeII "wiggle" to be more dramatic
+    - Residuals appear to be based on FeII, NOT gold continuum
+
+poly = True to poly = False
+    - Ha fit worsened, NL no longer centered with data, closer to line_prior wavelength (6564.61)
+    - Golden continuum not affected? Still appears to be a constant
+    - Did not appear to affect the "model for the whole spectrum"
+
+Fe_uv_op = False
+    - Gold continuum no longer constant
+    - Hb worse, OIII small completely skipped
+    - Hb still no NL comp
+    - BL split to 2 distinct components
+    - Ha BL components adjusted, not as severe as decompose_host = False
+
+Fe_uv_op = False, decompose_host = False
+    - NL is again shifted towards given rest wavelength (6564.61)
+    - Generally Ha NL very messed up
+    - Lost 1 Ha BL componenet
+
+Fe_uv_op = True to Fe_uv_op = False, decompose_host = False, poly = False
+    - Golden continuum not linear?????
+    - Residuals fairly poor (also poor for fe_uv_op_False_decompose_host_False)
+    - Still missing Hb na and now missed OIII large
+    - Hb BL got much smaller
+    - Ha NL are back, bit too large
+
+Fe_uv_op = False and poly = False
+    - Hb Br too broad
+    - Hb NL greatly improved
+    - Residuals on top of qso data
+    - Ha missing a NL component 
+    - Ha NA reset to rest wavelength (6564.61)
+    - Golden continuum not linear but worse than fe_uv_op_False
+
+host_line_mask = False
+    - Absorbtion lines/noise appeared in Ha and Hb
+    - Hb potentially noisier but could also be change in scale
+    - Worse fits for both
+    - Appears to only have affected line fits and not host/qso/continuum lines
+    
+decomp_na_mask = False
+    - Missing Hb OII large
+    - OII appears to have been partally absorbed into main Hb and overinflated the broad line component
+
+linefit = False
+    - Continuum fitting with decompose_host == True did not appear to change from graphic, scale altered
+
+BC = True and linefit = False
+- decompose_host True vs False
+    - QSO data is larger for False - bc the QSO data is no longer being subtracted from the host? yes that is exactly what is happening
+    - Emission lines flux being overinflated in False bc of combination with host light
+    - Error relatively the same for both
+    - Continuum fits are okay for both
+
+
+Conclusions:
+- host_line_mask, decomp_na_mask, and BC affect the decomposition process and are therefore only relavent when decompose_host == True
+- Fe_uv_op == False degraded the fit in all cases
+- Fe_uv_op does not start until OII emission line at 3728.48 - maybe reduce wavelength range?
+- decompose_host appears to better estimate the QSO light in the overall continuum
+- BC == True doesn't appear to have a signficant affect on the blue end of the spectrum
+
+Need to verify conclustions
+- The gold continuum is power-law + polynomial continuum
+- PCA models do improve continuum fit but idk how to add one/find/create one yet
+
 
 ** HELP SECTION
         Need to work on interpreting results
@@ -131,6 +238,23 @@ Pyqsofit
 
         Ratio of narrow line methods to correct both
 
+        Is there a reliable reason why playing with wavelength range affects stuff and is there a method or just do it
+        Tieing parameters together
+            Wanting to constrain the voffset of narrow line groups together based on "galactic redshift" things??
+            But also wanting to relate na and br components without overly restricting the br voff
+            Ask Steph for help on Friday
+
+        Insight around balancing Hb components
+        Nuance between narrow and broad components vs core and wing componenets
+
+        Wing lines: only if the residuals are bad on one side
+
+        MgII has habit of going under, Hb has habit of going over
+
+        What happens when you required a broad line component when it is a narrow line source?
+
+        L
+
 *** TO DO
         Figure out to tie/limit parameters, try to tie as many as possible
             Make some dependent of others
@@ -147,6 +271,39 @@ Pyqsofit
         Core/Wing components
         OIII max of 1000km/s
         MgII as broad as it wants, just play with the widths
+
+        Figure out how to access/parse results
+
+        Change the offset to +- 1000 at absolute max, shouldn't be more than 500 km/s with the offset
+        Don't link br and na, restrict the offset range by more
+
+        Paper writing before
+            Get refamiliarize with overleaf
+            Go into the broad science goals
+            Find some of the specifications for the PFS
+                Go to the summary of the instrument
+                Field of view
+                Spectral Resolution
+                Wavelength range
+            Background data surrounding AGN
+                What are they?
+                Why are they important?
+            Spectroscopy
+                What can you learn about AGN sources from spectrospy?
+            Data/Methods section
+                Include an example spectra
+
+        line priors use Ha, NII, Hb, OIII, MgII
+
+        Look at the output to get the error and sort through fits
+        Need a 3:1 ratio from line to error
+
+        Highest and lowest 10 redshift and then find broad and narrowline sources
+        Also look at SED class shape within the redshift bins
+
+        High redshift skewed towards broadlines, low redshift skewed towards narrowlines
+
+        Odd one, sed_shape 94
 
 
 

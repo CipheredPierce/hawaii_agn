@@ -1,0 +1,99 @@
+Additional Pyqsofit Documentation
+
+Continuum Fitting:
+
+What is the continuum luminosity measurement?
+    Able to "add/delete/modify wavelength positions for contiuum luminosity measurements in final fits"
+        I assume that this is referencing the conti_priors table in the process of creating qsopar.fits
+
+What is "lstsq" for PCA template?
+    "least squares"
+    Minimizes residual ||Ax - b||^2
+
+    PCA: Get a set of eigenvectors to form a basis
+    least squares function (NumPy/SciPy - which one does Pyqsofit) is an alternative for a dot product for representing data point in terms of templates
+    A x = b
+    A is PCA template matrix (comprised of eigenvectors/principal components)
+    b is data vector you want to decompose
+    x is coefficients you are solving for
+
+    PCA: Principal Component Analysis
+    - PCA templates come from a library of established spectra
+    - Templates form a basis that can be linearly combined
+    - Combining PCA models reconstructs a host galaxy model
+    - "explained variance plot" - do we have those? can I make them? should I make them?
+        - scree plot - plotting explained variance vs. number of components
+    - I am going to assume that the library PyQSOFit uses is the SDSS galaxy spectra
+    - Need to know the general class of the galaxy before running with PCA
+        - Ask Noah for the classes of objects later and re-run bulk fitting with PCA template?
+    - Able to directly choose the number of components (dimensions) that the PCA template includes, able to filter the spectra chosen to create a better model
+        - For AGN, standard is 5-10, captures ~95% of variance w/out fitting noise
+
+
+What is the SN? Signal to noise ratio 
+
+Also fur_result groups
+
+Host decomposition function utilizes the BC03 template
+
+lmfit - scipy function that is useful for fitting
+
+host_prior addition
+    What is a PCQ template?
+    Decomposition is performed by HostDecomp.py module
+        "add sigma measurements and Dn4000 estimation of decomposed host component"
+
+Modules utilized by Pyqsofit
+    sfdmap - Corrects for galactic dust extinction before analyzing spectra
+        Gives E(B-V) value
+            Color excess/reddening from the Blue to the Visual (green) filter (440-550nm)
+            NOT redshift
+                Changes the flux ratio between blue and red and makes objects look redder vs
+                Shifts the entire spectrum to longer wavelengths and does not inherently redden
+
+        If this is used before analyzing spectra, why does the poly parameter say "account for dust reddening?"
+
+
+Notes/Questions from reading through source code
+QSOFit() __init__ has a fiberid parameter
+Line 142 typo, "and_mask_in, or_mask_in"???
+
+
+Line 532, appear to need both an and_mask_in and an or_mask_in for the masking to work
+
+What is and_mask vs and_mask_in?
+
+Line 559, spectra data has been put in rest frame before decomposition
+
+Line 574, why are 4200 and 5100 relevant numbers for the fraction of host contribution
+
+Line 611, MaskSdssAndOr, how does one build a mask? And what exactly is a mask? What is the difference between the or_mask and the and_mask?
+
+Line 626, np.where identifies elements in an array based on a condition
+    Guesses: mask has the same dimensions as the spectra, mapped with 1s and 0s to select pixels
+
+fit_continuum
+    self.fe_uv and self.fe_op rely on fe_uv.txt and fe_optical.txt
+    Line 2622, what is this code doing:
+        def read_conti_params(param_file_path='qsopar.fits'):
+            # read line parameter
+            hdul = fits.open(param_file_path)
+
+            conti_windows = np.vstack([np.array(t) for t in hdul[2].data])
+            data = hdul[3].data
+
+            return data, conti_windows
+
+    Line 944, where is Parameters() class defined: from lmfit
+
+    Line 972, " # polynomial for the continuum f = a_0 x^0 + a_1 x^1 + a_2 x^2 + ... "
+    Line 922, check if the windows in the conti_prior channel are a good fit for our spectra, windows should be emission-free zones
+        (zones are grey bars on top of graph)
+
+    Lines 1023-1046
+        The PL is component always used to fit the continuum and incluces data from the entire pp array (parameter passed to lambda function)
+        creating lambda functions depending on what fitting parameters are set to true
+
+     def PL(self, xval, pp, x0=3000):
+        return pp[6] * (xval / x0) ** pp[7]
+        norm factor * ratio of xval / x0 (default is 3000) raised to the slope of the power-law?

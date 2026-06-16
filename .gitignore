@@ -6,6 +6,7 @@ data/
 obj_info/
 Galight/
 galight/
+joblib/
 
 *.ipynb
 *.fits
