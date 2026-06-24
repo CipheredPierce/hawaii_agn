@@ -97,3 +97,126 @@ fit_continuum
      def PL(self, xval, pp, x0=3000):
         return pp[6] * (xval / x0) ** pp[7]
         norm factor * ratio of xval / x0 (default is 3000) raised to the slope of the power-law?
+
+
+New conclusions after looking through the fit_continuum function
+
+    - Fit function walkthrough
+        - Host decomposition is completed before the continuum fitting
+    - FeII continuum fitting component
+        - Controlled by Fe_uv_op fitting   
+        - UV continuum region is from 1200 to 3500 A (MgII template)
+        - Optical is from 3686 to 7484 (Hb/Ha template)
+    - Balmer continuum fitting component
+        - Controlled by BC parameter
+        - Wavelengths < 3646
+    - Polynomial contiuum component
+        - # polynomial for the continuum f = a_0 x^0 + a_1 x^1 + a_2 x^2 + ... "
+        - Controlled by poly parameter
+        - Coefficients provided in conti_priors table
+    - reg_abs_conti
+        - According to comment on line 1068, mask absorbtion lines during a second fitting of the continuum
+        - PL and poly components are used in masking process
+        - Verify, does this mask components?
+        # Calculate the continuum fit and mask the absorption lines before re-fitting
+        if self.rej_abs_conti == True:
+            if self.poly == True:
+                tmp_conti = self.PL(wave[tmp_all], params) + self.F_poly_conti(wave[tmp_all], params[11:])
+            else:
+                tmp_conti = self.PL(wave[tmp_all], params)
+
+            ind_noBAL = ~np.where((flux[tmp_all] < tmp_conti - 3 * err[tmp_all]) & (wave[tmp_all] < 3500), True, False)
+
+         f_conti_model_eval = self.PL(wave_eval, pp) + self.Fe_flux_mgii(wave_eval, pp[0:3]) + self.Fe_flux_balmer(
+            wave_eval, pp[3:6]) + self.F_poly_conti(wave_eval, pp[11:]) + self.Balmer_conti(wave_eval, pp[8:11])
+
+What is being plotted after looking through plot_fig()
+    - Cyan line w/ "Fe" label: complete continuum: includes all components, Fe_uv_op, BC, poly, and PL
+    - Yellow line w/ "BC" label: balmer, PL, and polynomial components, only printed when BC == True
+    - Orange line w/ "Conti" label: PL and poly components only
+
+    ** To look at in future, MC/MCMC section
+    ** Line fitting, see how continuum interacts w/ flux subtraction
+
+storage planning section: 
+
+    def save_result(self, conti_result, conti_result_type, conti_result_name, line_result, line_result_type,
+                    line_result_name, save_fits_path, save_fits_name):
+        """Save all data to fits"""
+        self.all_result = np.concatenate([conti_result, line_result])
+        self.all_result_type = np.concatenate([conti_result_type, line_result_type])
+        self.all_result_name = np.concatenate([conti_result_name, line_result_name])
+
+        t = Table(self.all_result, names=(self.all_result_name), dtype=self.all_result_type)
+        t.write(os.path.join(save_fits_path, save_fits_name + '.fits'), format='fits', overwrite=True)
+        return
+
+conti_result: continuum result
+line_result: line parameters result
+
+With the MC = True, generates error arrays: List of names q.line_result_names
+'1_complex_name' '1_line_status' '1_line_min_chi2' '1_line_bic'
+ '1_line_red_chi2' '1_niter' '1_ndof' '2_complex_name' '2_line_status'
+ '2_line_min_chi2' '2_line_bic' '2_line_red_chi2' '2_niter' '2_ndof'
+ '3_complex_name' '3_line_status' '3_line_min_chi2' '3_line_bic'
+ '3_line_red_chi2' '3_niter' '3_ndof' 'MgII_br_1_scale'
+ 'MgII_br_1_scale_err' 'MgII_br_1_centerwave' 'MgII_br_1_centerwave_err'
+ 'MgII_br_1_sigma' 'MgII_br_1_sigma_err' 'MgII_na_1_scale'
+ 'MgII_na_1_scale_err' 'MgII_na_1_centerwave' 'MgII_na_1_centerwave_err'
+ 'MgII_na_1_sigma' 'MgII_na_1_sigma_err' 'Hb_br_1_scale'
+ 'Hb_br_1_scale_err' 'Hb_br_1_centerwave' 'Hb_br_1_centerwave_err'
+ 'Hb_br_1_sigma' 'Hb_br_1_sigma_err' 'Hb_na_1_scale' 'Hb_na_1_scale_err'
+ 'Hb_na_1_centerwave' 'Hb_na_1_centerwave_err' 'Hb_na_1_sigma'
+ 'Hb_na_1_sigma_err' 'OIII4959c_1_scale' 'OIII4959c_1_scale_err'
+ 'OIII4959c_1_centerwave' 'OIII4959c_1_centerwave_err' 'OIII4959c_1_sigma'
+ 'OIII4959c_1_sigma_err' 'OIII5007c_1_scale' 'OIII5007c_1_scale_err'
+ 'OIII5007c_1_centerwave' 'OIII5007c_1_centerwave_err' 'OIII5007c_1_sigma'
+ 'OIII5007c_1_sigma_err' 'Ha_br_1_scale' 'Ha_br_1_scale_err'
+ 'Ha_br_1_centerwave' 'Ha_br_1_centerwave_err' 'Ha_br_1_sigma'
+ 'Ha_br_1_sigma_err' 'Ha_na_1_scale' 'Ha_na_1_scale_err'
+ 'Ha_na_1_centerwave' 'Ha_na_1_centerwave_err' 'Ha_na_1_sigma'
+ 'Ha_na_1_sigma_err' 'NII6549_1_scale' 'NII6549_1_scale_err'
+ 'NII6549_1_centerwave' 'NII6549_1_centerwave_err' 'NII6549_1_sigma'
+ 'NII6549_1_sigma_err' 'NII6585_1_scale' 'NII6585_1_scale_err'
+ 'NII6585_1_centerwave' 'NII6585_1_centerwave_err' 'NII6585_1_sigma'
+ 'NII6585_1_sigma_err' 'MgII_whole_br_fwhm' 'MgII_whole_br_fwhm_err'
+ 'MgII_whole_br_sigma' 'MgII_whole_br_sigma_err' 'MgII_whole_br_ew'
+ 'MgII_whole_br_ew_err' 'MgII_whole_br_peak' 'MgII_whole_br_peak_err'
+ 'MgII_whole_br_area' 'MgII_whole_br_area_err' 'MgII_whole_br_snr'
+ 'MgII_whole_br_snr_err' 'Hb_whole_br_fwhm' 'Hb_whole_br_fwhm_err'
+ 'Hb_whole_br_sigma' 'Hb_whole_br_sigma_err' 'Hb_whole_br_ew'
+ 'Hb_whole_br_ew_err' 'Hb_whole_br_peak' 'Hb_whole_br_peak_err'
+ 'Hb_whole_br_area' 'Hb_whole_br_area_err' 'Hb_whole_br_snr'
+ 'Hb_whole_br_snr_err' 'Ha_whole_br_fwhm' 'Ha_whole_br_fwhm_err'
+ 'Ha_whole_br_sigma' 'Ha_whole_br_sigma_err' 'Ha_whole_br_ew'
+ 'Ha_whole_br_ew_err' 'Ha_whole_br_peak' 'Ha_whole_br_peak_err'
+ 'Ha_whole_br_area' 'Ha_whole_br_area_err' 'Ha_whole_br_snr'
+ 'Ha_whole_br_snr_err']
+
+
+FITS SHOULD store all of the same data as the np arrays (yay!) so I only have to store one
+Potential Storage systems/access systems
+    - Goals
+        - Pull data from specific spectra in an appended file
+        - Pull specific value from fits file
+        - Plot the fit of a specific spectra
+    - Questions
+        - Have 1 appended FITS file for each fitting run? 
+        - Have all separate files and create access system based on folder instead of fit
+        - How will queries work?
+            - JWST obcode?
+            - Index placement in .csv? (bad idea to rely on alone)
+                - Make JWST rank over index placement
+            - Time and date
+    - Ideas
+        - Add timestamps as part of file names to create unique file names
+    - Functions/scripts to build 
+        - Append the fits to 1 file
+        - Plot a specific fit
+        - Pull data value based on column name
+            - Templated function? Do you need those in Python
+        - Print all of the column names
+    - Execution:
+        - Create a random file with a bunch of functions...not great
+        - Create a Python class to perform operations on each fit
+            - Alter PyQSOFit code that creates the result in the first place???

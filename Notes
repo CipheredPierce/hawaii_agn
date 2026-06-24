@@ -305,5 +305,70 @@ Need to verify conclustions
 
         Odd one, sed_shape 94
 
+        Add restrictions to br components, max of 10,000km/s
+        Look into the ranges of the line priors, does it affect the entire fit or just the zoom?
+        Nr components Minimum should be spectral resolution of the instrument (can use 0)
+            Initial guess can be 150km/same
+        v/off, let br and nr be free, don't let go beyond 1000km/s 
+            IF the voff is too large, risk fitting noise
+        Tie togther NII amplitude w/ ratios
+        OIII and NII doublets should have the same velocity
+        Can try tieing the width of OIII and NII as well
 
+        Start w/ 1 broad gaussian
+
+        Try and improve the make-believe broad fitting?
+        Maybe add a 2nd broad component
+        Does the velocity offset impact the multiple gaussian components?
+        Does having multiple gaussian components tell us anything about the AGN?
+
+
+Zoom paper meeting Notes
+
+- Tell the reader a story - convince them to care about what you are talking about
+- We know that all galaxies have SMBH, these black holes have a big impact on the host galaxy
+- Follow by AGN
+- Focus on AGN and Spectroscopy
+- Selection is based on X-relatively
+- AGN emit at a broad range of energy, including X-ray to gamma emission
+- One commonly accepted scenario episodes of the AGN formation are galaxy mergers (helpful to talk about dual AGN later)
+- One way to identify AGN emission is through emission lines
+    - Find the emission lines that are unique to AGN
+    - Broad emission lines are also unique to AGN
+- Creating associating between black hole mass and mergers and growth has been difficult bc of xyz
+" I will use optical spectroscopy to examine dual AGN systems that could be cosmologically classified as a mergers
+
+- Aiming for 1-2 pages, around 5 paragraph maximum
+
+
+Methodology section
+- before the software, what are you doing?
+- Describe the sample
+- Then the observations
+- Then the procedure
+- And THEN the specific software within that procedure
+- Include the "key technical aspects of PFS"
+    - Reason why this work couldn't be done prior to mean
+- Include subsection called "Sample"
+    - COSMOS Field and COSMOS-Webb Field
+    - All x-ray samples from the Chandra parent sample
+    - Chose x-ray bc they are good tracer of AGN
+    - Give link to Chandra-COSMOS paper
+    - Parent sample Selection
+    - Look at Noah's to find list of background papers on the COSMOS survey
+
+- Ask about MCMC vs MC sampling, why did Steph say that she can only used MC sampling?
+- Learn more about how PyQSOFit treats MC vs MCMC sampling
+
+
+Science goals/think out paper format
+Overall goal: AGN cause mergers??? All AGN are a result of merged galaxies? 
+
+AGN are a result of a galaxy merger
+Galaxy mergers trigger AGN growth
+We have Connor's paper that shows the black hole mass growth in AGN
+    - Is class 5 the end of an AGN?
+    - Is class 5 the start of an AGN before it merges with another class 5?
+
+Make up a slack - Ask Connor for Slack
 
