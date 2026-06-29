@@ -372,3 +372,110 @@ We have Connor's paper that shows the black hole mass growth in AGN
 
 Make up a slack - Ask Connor for Slack
 
+Necessary Parameters for recreating fits
+Note: deredden uses ra and dec
+
+Questions: 
+- When we "recreate" a fit, does that mean we run the spectra object through PyQSOFit? 
+Does it mean we are replotting the figure? Is it purely mathematical and done by getting important results?
+
+*** For combination *_result, *_result_name, *_result_type, *_result contains number values, *_ contains column names that
+correspond to *_result, and *_result_type gives type of each entry in *_result
+
+Required to recreate fits:
+    host_result
+        Contains the following values: 
+            SN_host: Signal to noise ratio of the recovered host spectrum (host_data = data - qso_model)
+            rchi2_decomp: Reduced x^2 of the PCA decomposition ((data − host − qso)² / err², divided by (npix − npca_qso − npca_gal))
+            frac_host_4200: Fraction of total flux attributable to the host galaxy in a narrow window around 4200 Å (sum(host)/sum(data) over 4160–4210 Å).
+            frac_host_5100: Same, but in the 5080–5130 Å window (the classic AGN continuum-luminosity region).
+            Dn4000: The 4000 Å break strength, measured from the recovered host template only (mean flux in 4000–4100 Å in f_ν over mean flux in 3850–3950 Å). Values near 1 indicate young/star-forming populations; values approaching ~1.5–2 indicate older, redder stellar populations (more typical of massive ellipticals/bulges).
+            sigma: Stellar velocity dispersion of the host galaxy. This is a sizable dispersion — consistent with a massive bulge/elliptical-type host, and via the M–σ relation would imply a substantial black hole mass.
+            sigma_err: uncertainty on sigma (from ppxf's formal error × √χ², or from MC resampling if MC=True).
+            v_off: Best-fit velocity offset of the host stellar component relative to the systemic redshift z you supplied. A modest offset like this is common (small residual redshift error, or genuine kinematic offset between host and AGN narrow-line redshift).
+            v_off_err: Uncertainty on v_off.rchi2_ppxf0.114Reduced χ² of the ppxf fit itself.
+            gal_par_[i]:  coefficients on the 5 galaxy PCA eigenspectra (Yip et al. 2004)
+            qso_par_[i]: 10 coefficients on the QSO PCA eigenspectra 
+
+    conti_params: Python list of the "best-fit" parameters, obeys following order based on PyQSOFit source code 
+        0: Fe_uv_norm
+        1: Fe_uv_FWHM
+        2: Fe_uv_shift
+        3: Fe_op_norm
+        4: Fe_op_FWHM
+        5: Fe_op_shift
+        6: PL_norm (@ 3000 A)
+        7: PL_slope (a in (lambda/3000)^slope)
+        8: Balmer_norm
+        9: Balmer_Te (continuum electron temperature)
+        10: Balmer_Tau (continuum optical depth at Balmer edge)
+        11: conti_a_0: polynomial coefficient
+        12: conti_a_1
+        13: conti_a_2
+    conti_result: Metadata (ra, dec, ids), SN_ratio_conti, followed by all conti_params and all host_result
+
+    line_result: Contains the calculated values from fitting emission line complexes, includes a scale, centerwave, and sigma component for each line (lines are determined by line_priors)
+        - For line complexes (Ha, Hb, etc., the line_result contains components for both separate lines, (Hb, OIII4959, etc.) and a blended version with all components considered)
+
+    wave: The grid everything else was evaluated on, after processing bad
+    flux, err: if you want residuals/χ² or to recompute line_flux
+
+    User input from q.Fit()
+        # prepocessing parameters
+          nsmooth=1,  # do n-pixel smoothing to the raw input flux and err spectra
+          and_mask=False,  # delete the and masked pixels
+          or_mask=False,  # delete the or masked pixels
+          reject_badpix=True,  # reject 10 most possible outliers by the test of pointDistGESD
+          deredden=True,  # correct the Galactic extinction
+          wave_range = None,  # trim input wavelength
+          wave_mask=None,  # 2-D array, mask the given range(s)
+
+          # host decomposition parameters
+          decompose_host=True,  # If True, the host galaxy-QSO decomposition will be applied
+          host_prior=False, # If True, the code will adopt prior-informed method to assist decomposition. Currently, only 'CZBIN1' and 'DZBIN1' model for QSO PCA are available. And the model for galaxy must be PCA too.
+          host_prior_scale = 0.2,
+          #host_prior_scale=0.2, # scale of prior panelty. Usually, 0.2 works fine for SDSS spectra. Adjust it smaller if you find the prior affect the fitting results too much.
+
+          host_line_mask=True, # If True, the line region of galaxy will be masked when subtracted from original spectra.
+          decomp_na_mask=True, # If True, the narrow line region will be masked when perform decomposition
+          qso_type='CZBIN1', # PCA template name for quasar
+          npca_qso=10, # numebr of quasar templates
+          host_type='PCA', # template name for galaxy
+          npca_gal=5, # number of galaxy templates
+          
+          # continuum model fit parameters
+          Fe_uv_op=True,  # If True, fit continuum with UV and optical FeII template
+          poly=False,  # If True, fit continuum with the polynomial component to account for the dust reddening
+          BC=False,  # If True, fit continuum with Balmer continua from 1000 to 3646A
+          initial_guess=None,  # Initial parameters for continuum model, read the annotation of this function for detail
+          rej_abs_conti=False,  # If True, it will iterately reject 3 sigma outlier absorption pixels in the continuum
+          n_pix_min_conti=100,  # Minimum number of negative pixels for host continuuum fit to be rejected.
+
+          # emission line fit parameters
+          linefit=True,  # If True, the emission line will be fitted
+          rej_abs_line=False,
+          # If True, it will iterately reject 3 sigma outlier absorption pixels in the emission lines
+
+          # fitting method selection
+          MC=False,
+          # If True, do Monte Carlo resampling of the spectrum based on the input error array to produce the MC error array
+          MCMC=False,
+          # If True, do Markov Chain Monte Carlo sampling of the posterior probability densities to produce the error array
+          nsamp=200,
+          # The number of trials of the MC process (if MC=True) or number samples to run MCMC chain (if MCMC=True)
+
+          # advanced fitting parameters
+          param_file_name='testqsopar.fits',  # Name of the qso fitting parameter FITS file.
+          nburn=20,  # The number of burn-in samples to run MCMC chain
+          nthin=10,  # To set the MCMC chain returns every n samples
+          epsilon_jitter=0.,
+          # Initial jitter for every initial guass to avoid local minimum. (Under test, not recommanded to change)
+
+    z: Needed by flux2L() for any luminosity recomputation
+    host_type, qso_type: Used for PCA templates (maybe only relevant if we change them?)
+
+
+
+
+
+
